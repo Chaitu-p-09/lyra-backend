@@ -7,7 +7,7 @@ app = Flask(__name__)
 CORS(app)
 
 HF_API_KEY = os.environ.get("HF_API_KEY")
-MODEL = "google/flan-t5-large"
+MODEL = "google/flan-t5-base"
 
 @app.route("/lyra", methods=["POST"])
 def lyra():
