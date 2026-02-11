@@ -6,8 +6,7 @@ import os
 app = Flask(__name__)
 CORS(app)
 
-HF_API_KEY = os.environ.get("HF_API_KEY")
-MODEL = "google/flan-t5-base"
+GROQ_API_KEY = os.environ.get("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")
 
 @app.route("/lyra", methods=["POST"])
 def lyra():
@@ -16,32 +15,29 @@ def lyra():
 
     system_prompt = f"""
 You are LYRA, a female Indian AI assistant.
-Owner: Chaitu
+Owner: Chaitu.
 Speak short, natural, voice-friendly replies.
 Hindi/English mix allowed.
 """
 
-    payload = {
-        "inputs": system_prompt + "\nUser: " + user_text + "\nLYRA:",
-        "parameters": {"max_new_tokens": 120}
-    }
-
-    headers = {
-        "Authorization": f"Bearer {HF_API_KEY}"
-    }
-
     response = requests.post(
-        f"https://api-inference.huggingface.co/models/{MODEL}",
-        headers=headers,
-        json=payload
+        "https://api.groq.com/openai/v1/chat/completions",
+        headers={
+            "Authorization": f"Bearer {GROQ_API_KEY}",
+            "Content-Type": "application/json"
+        },
+        json={
+            "model": "llama3-8b-8192",
+            "messages": [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_text}
+            ]
+        }
     )
 
     result = response.json()
 
-    if isinstance(result, dict) and result.get("error"):
-        return jsonify({"reply": "Model is loading. Try again."})
-
-    reply = result[0]["generated_text"].split("LYRA:")[-1].strip()
+    reply = result["choices"][0]["message"]["content"]
 
     return jsonify({"reply": reply})
 
