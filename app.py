@@ -10,36 +10,44 @@ GROQ_API_KEY = os.environ.get("gsk_RD63AqxkWaMXDp2ygchOWGdyb3FYbEGR1ToU15GcvEFZc
 
 @app.route("/lyra", methods=["POST"])
 def lyra():
-    data = request.json
-    user_text = data.get("message", "")
+    try:
+        data = request.json
+        user_text = data.get("message", "")
 
-    system_prompt = f"""
+        system_prompt = """
 You are LYRA, a female Indian AI assistant.
 Owner: Chaitu.
 Speak short, natural, voice-friendly replies.
 Hindi/English mix allowed.
 """
 
-    response = requests.post(
-        "https://api.groq.com/openai/v1/chat/completions",
-        headers={
-            "Authorization": f"Bearer {GROQ_API_KEY}",
-            "Content-Type": "application/json"
-        },
-        json={
-            "model": "llama3-8b-8192",
-            "messages": [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_text}
-            ]
-        }
-    )
+        response = requests.post(
+            "https://api.groq.com/openai/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {GROQ_API_KEY}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "model": "llama3-8b-8192",
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_text}
+                ]
+            }
+        )
 
-    result = response.json()
+        result = response.json()
 
-    reply = result["choices"][0]["message"]["content"]
+        # Debug fallback
+        if "choices" not in result:
+            return jsonify({"reply": "Groq API error: " + str(result)})
 
-    return jsonify({"reply": reply})
+        reply = result["choices"][0]["message"]["content"]
+
+        return jsonify({"reply": reply})
+
+    except Exception as e:
+        return jsonify({"reply": "Server error: " + str(e)})
 
 
 if __name__ == "__main__":
