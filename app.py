@@ -4,6 +4,7 @@ import requests
 import os
 
 app = Flask(__name__)
+CORS(app)
 
 HF_API_KEY = os.environ.get("HF_API_KEY")
 MODEL = "mistralai/Mistral-7B-Instruct-v0.2"
